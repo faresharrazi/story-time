@@ -1,0 +1,64 @@
+{
+  "name": "story-time",
+  "version": "1.0.0",
+  "description": "Kids Story Generator - A production-grade web application for generating customized children's stories",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:web\" \"npm run dev:services\"",
+    "dev:web": "cd apps/web && npm run dev",
+    "dev:services": "concurrently \"npm run dev:auth\" \"npm run dev:catalog\" \"npm run dev:character\" \"npm run dev:story\"",
+    "dev:auth": "cd apps/auth-service && go run main.go",
+    "dev:catalog": "cd apps/catalog-service && go run main.go",
+    "dev:character": "cd apps/character-service && go run main.go",
+    "dev:story": "cd apps/story-service && go run main.go",
+    "dev:workers": "concurrently \"npm run dev:text-worker\" \"npm run dev:image-worker\"",
+    "dev:text-worker": "cd apps/text-worker && python -m uvicorn main:app --reload --port 8001",
+    "dev:image-worker": "cd apps/image-worker && python -m uvicorn main:app --reload --port 8002",
+    "build": "npm run build:web && npm run build:services",
+    "build:web": "cd apps/web && npm run build",
+    "build:services": "npm run build:go-services && npm run build:python-workers",
+    "build:go-services": "cd apps/auth-service && go build -o ../../bin/auth-service . && cd ../catalog-service && go build -o ../../bin/catalog-service . && cd ../character-service && go build -o ../../bin/character-service . && cd ../story-service && go build -o ../../bin/story-service .",
+    "build:python-workers": "cd apps/text-worker && pip install -r requirements.txt && cd ../image-worker && pip install -r requirements.txt",
+    "test": "npm run test:web && npm run test:services",
+    "test:web": "cd apps/web && npm test",
+    "test:services": "npm run test:go && npm run test:python",
+    "test:go": "cd apps/auth-service && go test ./... && cd ../catalog-service && go test ./... && cd ../character-service && go test ./... && cd ../story-service && go test ./...",
+    "test:python": "cd apps/text-worker && python -m pytest && cd ../image-worker && python -m pytest",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "setup": "npm install && npm run docker:up && npm run build",
+    "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules bin/",
+    "lint": "npm run lint:web && npm run lint:go",
+    "lint:web": "cd apps/web && npm run lint",
+    "lint:go": "cd apps/auth-service && golangci-lint run && cd ../catalog-service && golangci-lint run && cd ../character-service && golangci-lint run && cd ../story-service && golangci-lint run"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "lerna": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/faresharrazi/story-time.git"
+  },
+  "keywords": [
+    "story-generator",
+    "kids",
+    "ai",
+    "openai",
+    "microservices",
+    "nextjs",
+    "go",
+    "python"
+  ],
+  "author": "Fares Harrazi",
+  "license": "UNLICENSED"
+}
